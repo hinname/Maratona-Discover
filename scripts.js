@@ -69,7 +69,12 @@ const Transaction = {
   },
 
   removeAll() {
-
+    
+    Transaction.all = [];
+    Storage.set(Transaction.all);
+    Modal.RemoveAll.close();
+    App.reload();
+    
   },
   incomes() {
     //somar as entradas
