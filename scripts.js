@@ -1,5 +1,5 @@
 const Modal = { //fazer função toggle
-  New : {
+  NewTransaction : {
     open() {
       //Abrir modal
       //Adicionar a class active ao modal
@@ -182,7 +182,7 @@ const Form = {
       Transaction.add(transaction)
       //apagar form
       Form.clearFields()
-      Modal.New.close()
+      Modal.NewTransaction.close()
 
 
     } catch(error) {
