@@ -55,7 +55,7 @@
             <section id="transaction">
                   <h2 class="sr-only">Transações</h2>
 
-                  <a href="#" onclick="Modal.NewTransaction.open()" class="button new">+ Nova Transação</a>
+                  <a href="#" id="newTransaction" onclick="Modal.Transaction.open(this)" class="button new" >+ Nova Transação</a>
 
                   <table id="data-table">
                         <thead>
@@ -74,11 +74,11 @@
             </section>
       </main>
 
-      <div class="modal-overlay newTransaction">
-            <div class="modal newTransaction">
+      <div class="modal-overlay transaction">
+            <div class="modal transaction">
                   <div class="form">
                         <h2>Nova Transação</h2>
-                        <form action="" onsubmit="Form.submit(event)">
+                        <form action="" id="transactionForm" onsubmit="Form.newTransaction.submit(event)">
                               <div class="input-group">
                                     <label class="sr-only" for="description">Descrição</label>
                                     <input 
@@ -114,7 +114,7 @@
                               </div>
 
                               <div class="input-group actions">
-                                    <a href="#" onclick="Modal.NewTransaction.close()" class="button cancel">Cancelar</a>
+                                    <a href="#" onclick="Modal.Transaction.close()" class="button cancel">Cancelar</a>
                                     <button>Salvar</button>
                               </div>
                         </form>

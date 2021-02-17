@@ -249,13 +249,13 @@ table tbody tr td:last-child {
 
 }
 
-.modal-overlay.newTransaction.active,
+.modal-overlay.transaction.active,
 .modal-overlay.removeAll.active {
       opacity: 1;
       visibility: visible;
 }
 
-.modal-overlay.newTransaction {
+.modal-overlay.transaction {
       z-index: 991;
 }
 

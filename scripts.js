@@ -1,20 +1,34 @@
 const Modal = { //fazer função toggle
-  NewTransaction : {
-    open() {
+  Transaction : {
+    open(element) {
+      
       //Abrir modal
       //Adicionar a class active ao modal
       document
-            .querySelector('.modal-overlay.newTransaction')
+            .querySelector('.modal-overlay.transaction')
             .classList
             .add('active')
+
+      if(element.id != 'newTransaction') {
+        document.getElementById("transactionForm").setAttribute("onsubmit", `Form.editTransaction.update(event, ${element.id})`);
+        
+        Form.editTransaction.loadFields(element.id)
+      
+      } else {
+        document.getElementById("transactionForm").setAttribute("onsubmit", `Form.newTransaction.submit(event)`);
+
+      }
+      
     },
     close() {
           //fechar o modal
           //remover a classe active do modal
           document
-                .querySelector('.modal-overlay.newTransaction')
+                .querySelector('.modal-overlay.transaction')
                 .classList
                 .remove('active')
+          
+          Form.saveTransaction.clearFields()
     }
   },
 
@@ -58,8 +72,10 @@ const Transaction = {
     App.reload();
   },
 
-  edit(index) {
-    console.log(index)
+  edit(transaction, index) {
+    Transaction.all.splice(index, 1, transaction);
+
+    App.reload();
   },
 
   remove(index) {
@@ -74,7 +90,7 @@ const Transaction = {
     Storage.set(Transaction.all);
     Modal.RemoveAll.close();
     App.reload();
-    
+  
   },
   incomes() {
     //somar as entradas
@@ -107,16 +123,34 @@ const Transaction = {
 
 const Utils = {
 
-  formatAmount(value) {
-    value = Number(value) * 100
-
-    return Math.round(value);
+  saveTransaction: {
+    formatAmount(value) {
+      value = Number(value) * 100
+  
+      return Math.round(value);
+    },
+  
+    formatDate(date) {
+      const splittedDate = date.split("-")
+      return `${splittedDate[2]}/${splittedDate[1]}/${splittedDate[0]}`
+    },
   },
 
-  formatDate(date) {
-    const splittedDate = date.split("-")
-    return `${splittedDate[2]}/${splittedDate[1]}/${splittedDate[0]}`
+  editTransaction: {
+
+    formatAmount(value) {
+      value = Number(value) / 100
+  
+      return Math.round(value);
+    },
+
+    formatDate(date) {
+      const splittedDate = date.split("/")
+      return `${splittedDate[2]}-${splittedDate[1]}-${splittedDate[0]}`
+    }
   },
+
+  
 
   formatCurrency(value) {
     const signal = Number(value) < 0 ? "-" : "";
@@ -147,56 +181,131 @@ const Form = {
     }
   },
 
-  formatFields() {
-    let { description, amount, date } = Form.getValues()
-
-    amount  = Utils.formatAmount(amount)
-
-    date = Utils.formatDate(date)
-
-    return {
-      description,
-      amount,
-      date
-    }
-  },
-
-  clearFields() {
-    Form.description.value = ""
-    Form.amount.value = ""
-    Form.date.value = ""
-  },
-  validateFields() {
-    const { description, amount, date } = Form.getValues()
-
-    if(description.trim() === "" || 
-      amount.trim() ==="" ||
-      date.trim() ==="") {
-        throw new Error("Por favor, preencha todos os campos")
-      }
-  },
-  submit(event) {
-    event.preventDefault()
-
-    try {
-      //Garantir que não tenha campo vazio
-      Form.validateFields()
-      //formatar dados
-      const transaction = Form.formatFields()
-      //salvar
-      Transaction.add(transaction)
-      //apagar form
-      Form.clearFields()
-      Modal.NewTransaction.close()
-
-
-    } catch(error) {
-      alert(error.message)
-    }
-
     
 
-  }
+  editTransaction: {
+
+    getValue(index) {
+      let {description, amount, date} = Transaction.all[index];
+
+      return {
+        description,
+        amount,
+        date
+      }
+    },
+
+    formatValues(index) {
+      let {description, amount, date} = Form.editTransaction.getValue(index)
+
+      amount = Utils.editTransaction.formatAmount(amount)
+
+      date = Utils.editTransaction.formatDate(date)
+
+      return {
+        description,
+        amount,
+        date
+      }
+    },
+
+    loadFields(index) {
+
+        const transaction = Form.editTransaction.formatValues(index)
+
+        Form.description.value = transaction.description;
+        Form.amount.value = transaction.amount;
+        Form.date.value = transaction.date;
+  
+      
+    },
+
+    update(event, index) {
+      event.preventDefault()
+
+      try {
+        //Garantir que não tenha campo vazio
+        Form.saveTransaction.validateFields()
+        //formatar dados
+        const transaction = Form.saveTransaction.formatFields()
+        //salvar NO INDEX CERTO
+        Transaction.edit(transaction, index)
+        //apagar form
+        Form.saveTransaction.clearFields()
+        Modal.Transaction.close()
+
+      }catch(error) {
+        alert(error.message)
+      }
+    }
+    
+
+  },
+
+  saveTransaction: {
+    formatFields() {
+      let { description, amount, date } = Form.getValues()
+  
+      amount  = Utils.saveTransaction.formatAmount(amount)
+  
+      date = Utils.saveTransaction.formatDate(date)
+  
+      return {
+        description,
+        amount,
+        date
+      }
+    },
+  
+    validateFields() {
+      const { description, amount, date } = Form.getValues()
+  
+      if(description.trim() === "" || 
+        amount.trim() ==="" ||
+        date.trim() ==="") {
+          throw new Error("Por favor, preencha todos os campos")
+        }
+    },
+  
+  
+  
+    clearFields() {
+      Form.description.value = ""
+      Form.amount.value = ""
+      Form.date.value = ""
+    },
+
+    
+  },
+
+
+  newTransaction: {
+    submit(event) {
+      event.preventDefault()
+  
+      try {
+        //Garantir que não tenha campo vazio
+        Form.saveTransaction.validateFields()
+        //formatar dados
+        const transaction = Form.saveTransaction.formatFields()
+        //salvar
+        Transaction.add(transaction)
+        //apagar form
+        Form.saveTransaction.clearFields()
+        Modal.Transaction.close()
+  
+  
+      } catch(error) {
+        console.log(error.message)
+      }
+  
+      
+  
+    },
+  },
+  
+  
+  
 }
 
 //Substituir os dados do HTML com os dados do JS
@@ -220,7 +329,7 @@ const DOM = {
       <td class="${CSSclass}">${amount}</td>
       <td class="date">${transaction.date}</td>
       <td>
-            <img onclick="Transaction.edit(${index})" id="editimage" src="./assets/edit.svg" alt="Atualizar transação">
+            <img onclick="Modal.Transaction.open(this)" id="${index}" class="editImage" src="./assets/edit.svg" alt="Atualizar transação">
             <img onclick="Transaction.remove(${index})" src="./assets/minus.svg" alt="Remover transação">
       </td>
     `
